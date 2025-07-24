@@ -1,0 +1,16 @@
+{
+  "name": "ssd_practice",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "keywords": [],
+  "author": "Jonathan",
+  "license": "ISC",
+  "description": "Sample Application",
+  "dependencies": {
+    "express": "^5.1.0",
+    "package.json": "^2.0.1"
+  }
+}
