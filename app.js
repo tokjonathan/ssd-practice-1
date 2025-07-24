@@ -56,6 +56,6 @@ app.post('/login', (req, res) => {
 
 // Start Server
 app.listen(3000, () => {
-    console.log('Web Server listening running on port 3000');
+    console.log('Web server listening running on port 3000');
 });
 
