@@ -35,44 +35,25 @@ jobs:
       - name: Install ESLint SARIF Formatter
         run: npm install @microsoft/eslint-formatter-sarif --save-dev
 
-      - name: Verify installations
-        run: |
-          echo "ESLint version:"
-          npx eslint --version
-          echo "SARIF formatter check:"
-          npm list @microsoft/eslint-formatter-sarif
-          echo "Current directory:"
-          pwd
-          echo "Directory contents:"
-          ls -la
-
-      - name: Test ESLint command first
-        run: |
-          echo "Testing basic ESLint:"
-          npx eslint . --format stylish || echo "ESLint had issues"
-
       - name: Run ESLint with SARIF output
-        run: |
-          echo "Running ESLint with SARIF formatter..."
-          npx eslint . --format @microsoft/eslint-formatter-sarif --output-file reports/eslint-results.sarif 2>&1
-          echo "ESLint SARIF command exit code: $?"
+        run: npx eslint . --format @microsoft/eslint-formatter-sarif --output-file reports/eslint-results.sarif || true
 
       - name: Debug ESLint Output
+        run: cat reports/eslint-results.sarif || echo "No SARIF report generated"
+
+      - name: Check if SARIF file exists and upload
         run: |
-          echo "Checking reports directory:"
-          ls -la reports/
-          if [ -f reports/eslint-results.sarif ]; then
-            echo "SARIF file found! Contents:"
-            cat reports/eslint-results.sarif
+          if [ -f "reports/eslint-results.sarif" ]; then
+            echo "SARIF file exists, uploading..."
+            echo "SARIF_EXISTS=true" >> $GITHUB_ENV
           else
-            echo "No SARIF report generated"
-            echo "Creating minimal SARIF file:"
-            echo '{"version":"2.1.0","runs":[{"tool":{"driver":{"name":"ESLint"}},"results":[]}]}' > reports/eslint-results.sarif
+            echo "SARIF file does not exist, skipping upload"
+            echo "SARIF_EXISTS=false" >> $GITHUB_ENV
           fi
 
       - name: Upload SARIF report
+        if: env.SARIF_EXISTS == 'true'
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
         with:
           sarif_file: reports/eslint-results.sarif
         continue-on-error: true
